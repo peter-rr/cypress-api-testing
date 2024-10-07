@@ -26,6 +26,34 @@ describe('Test with backend', () => {
     
   })
 
+  it.only('intercepting and modifying the request and response', () => {
+
+    // cy.intercept('POST', '**/articles/', (req)  => {
+    //   req.body.article.description = "This is a description 2"
+    // }).as('postArticles')
+    
+    cy.intercept('POST', '**/articles/', (req)  => {
+      req.reply( res => {
+        expect(res.body.article.description).to.equal('This is a description')
+        res.body.article.description = "This is a description 2"
+      })
+    }).as('postArticles')
+    
+    cy.contains('New Article').click()
+    cy.get('[formcontrolname="title"]').type('This is the title')
+    cy.get('[formcontrolname="description"]').type('This is a description')
+    cy.get('[formcontrolname="body"]').type('This is a body of the article')
+    cy.contains('Publish Article').click()
+    
+    cy.wait('@postArticles').then( xhr => {
+      console.log(xhr)
+      expect(xhr.response.statusCode).to.equal(201)
+      expect(xhr.request.body.article.body).to.equal('This is a body of the article')
+      expect(xhr.response.body.article.description).to.equal('This is a description 2')
+    })
+    
+  })
+
   it('verify popular tags are displayed', () => {
     cy.get('.sidebar').find('.tag-list')
     .should('contain', 'cypress')
@@ -33,7 +61,7 @@ describe('Test with backend', () => {
     .and('contain', 'testing')
   })
 
-  it.only('verify global feed likes count', () => {
+  it('verify global feed likes count', () => {
     cy.intercept('GET', 'https://conduit-api.bondaracademy.com/api/articles/feed*', {"articles":[],"articlesCount":0})
     cy.intercept('GET', 'https://conduit-api.bondaracademy.com/api/articles*', { fixture: 'articles.json' })
 
@@ -52,6 +80,8 @@ describe('Test with backend', () => {
     cy.get('app-article-list button').eq(1).click().should('contain', '6')
 
    })
+
+
 
 
 
