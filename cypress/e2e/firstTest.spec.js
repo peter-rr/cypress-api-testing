@@ -79,7 +79,7 @@ describe('Test with backend', () => {
 
   })
 
-  it.only('delete a new article in a global feed', () => {
+  it('delete a new article in a global feed', () => {
     
     const userCredentials = {
       "user": {
@@ -121,22 +121,12 @@ describe('Test with backend', () => {
         url: 'https://conduit-api.bondaracademy.com/api/articles?limit=10&offset=0',
         headers: { 'Authorization': 'Token '+token},
         method: 'GET'
-    }).its('body').then( body => {
+      }).its('body').then( body => {
         expect(body.articles[0].title).not.to.equal('Request from the API')
+      })
+    
     })
     
-  })
-    
-
-})
-    
+  })  
  
-
-  
-
-
-
-
-
-
 })
